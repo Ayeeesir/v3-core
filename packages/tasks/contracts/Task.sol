@@ -110,3 +110,35 @@ abstract contract Task is
         _afterBaseTask(token, amount);
     }
 }
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol"; 
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract SmartVault is Ownable {
+    using SafeERC20 for IERC20;
+
+    event TokensCollected(address indexed token, address indexed source, uint256 amount);
+
+    /**
+     * @dev Collect tokens from an external account to the Smart Vault
+     * @param token Address of the token to be collected
+     * @param source Address where the tokens will be transferred from
+     * @param amount Amount of tokens to be transferred
+     */
+    function collect(address token, address source, uint256 amount) external onlyOwner {
+        // Ensure the token address is valid
+        require(token != address(0), "Invalid token address");
+
+        // Ensure the source address is valid
+        require(source != address(0), "Invalid source address");
+
+        // Ensure the amount is greater than zero
+        require(amount > 0, "Amount must be greater than zero");
+
+        // Interact with the ERC20 token contract using SafeERC20
+        IERC20(token).safeTransferFrom(source, address(this), amount);
+
+        // Emit event
+        emit TokensCollected(token, source, amount);
+    }
+}
